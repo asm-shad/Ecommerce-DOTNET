@@ -4,8 +4,8 @@ using asp_net_ecommerce_web_api.Controllers;
 using ecommerce_web_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
+builder.Services.AddAutoMapper(typeof (Program));
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 // Add services to the controller 
 builder.Services.AddControllers();
 
@@ -22,7 +22,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<CategoryService>();
+// builder.Services.AddSingleton<CategoryService>();
 
 var app = builder.Build();
 

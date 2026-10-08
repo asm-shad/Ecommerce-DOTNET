@@ -14,8 +14,8 @@ namespace asp_net_ecommerce_web_api.Controllers
     [Route("api/categories/")]
     public class CategoryController : ControllerBase
     {
-        private CategoryService _categoryService; 
-        public CategoryController(CategoryService categoryService)
+        private ICategoryService _categoryService; 
+        public CategoryController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }

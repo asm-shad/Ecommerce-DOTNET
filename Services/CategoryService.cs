@@ -2,61 +2,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using asp_net_ecommerce_web_api.Controllers;
 using asp_net_ecommerce_web_api.DTOs;
+using AutoMapper;
 using ecommerce_web_api.Models;
 
 namespace ecommerce_web_api.Services
 {
-    public class CategoryService
+    public class CategoryService: ICategoryService
     {
         private static readonly List<Category> _categories = new List<Category>();
+        private readonly IMapper _mapper;
+
+        public CategoryService(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
 
         public List<CategoryReadDto> GetAllCategories()
         {
-            return _categories.Select(c => new CategoryReadDto
-            {
-                CategoryId = c.CategoryId,
-                Name = c.Name,
-                Description = c.Description,
-                CreatedAt = c.CreatedAt
-            }).ToList();
+            return _mapper.Map<List<CategoryReadDto>>(_categories);
         }
 
         public CategoryReadDto? GetCategoryById(Guid categoryId)
         {
             var findCategory = _categories.FirstOrDefault(c => c.CategoryId == categoryId);
-            if (findCategory == null)
-            {
-                return null;
-            }
-            return new CategoryReadDto
-            {
-                CategoryId = findCategory.CategoryId,
-                Name = findCategory.Name,
-                Description = findCategory.Description,
-                CreatedAt = findCategory.CreatedAt
-            };
+            return findCategory == null ? null : _mapper.Map<CategoryReadDto>(findCategory);
         }
 
         public CategoryReadDto CreateCategory(CategoryCreateDto categoryData)
         {
-            var newCategory = new Category
-            {
-                CategoryId = Guid.NewGuid(),
-                Name = categoryData.Name,
-                Description = categoryData.Description,
-                CreatedAt = DateTime.UtcNow,
-            };
+            // CategoryCreateDto => Category
+            var newCategory = _mapper.Map<Category>(categoryData);
+            newCategory.CategoryId =Guid.NewGuid();
+            newCategory.Description = categoryData.Description;
 
             _categories.Add(newCategory);
 
-            return new CategoryReadDto
-            {
-                CategoryId = newCategory.CategoryId,
-                Name = newCategory.Name,
-                Description = newCategory.Description,
-                CreatedAt = newCategory.CreatedAt,
-            };
+            return _mapper.Map<CategoryReadDto>(newCategory);
         }
         public CategoryReadDto? UpdateCategoryById(Guid categoryId, CategoryUpdateDto categoryData)
         {
@@ -66,16 +49,9 @@ namespace ecommerce_web_api.Services
                 return null;
             }
 
-            foundCategory.Name = categoryData.Name;
-            foundCategory.Description = categoryData.Description;
+            _mapper.Map(categoryData, foundCategory);
 
-            return new CategoryReadDto
-            {
-                CategoryId = foundCategory.CategoryId,
-                Name = foundCategory.Name,
-                Description = foundCategory.Description,
-                CreatedAt = foundCategory.CreatedAt,
-            };
+            return _mapper.Map<CategoryReadDto>(foundCategory);
         }
         public bool DeleteCategoryById(Guid categoryId)
         {
