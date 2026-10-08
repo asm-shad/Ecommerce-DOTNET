@@ -4,3 +4,20 @@ GET {{ecommerce_web_api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+### Create
+POST http://localhost:5145/api/categories
+
+###
+
+### Read
+GET http://localhost:5145/api/categories
+
+###
+
+### Update
+PUT http://localhost:5145/api/categories
+
+###
+
+### Delete
+DELETE http://localhost:5145/api/categories
