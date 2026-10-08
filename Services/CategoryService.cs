@@ -1,0 +1,91 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using asp_net_ecommerce_web_api.DTOs;
+using ecommerce_web_api.Models;
+
+namespace ecommerce_web_api.Services
+{
+    public class CategoryService
+    {
+        private static readonly List<Category> _categories = new List<Category>();
+
+        public List<CategoryReadDto> GetAllCategories()
+        {
+            return _categories.Select(c => new CategoryReadDto
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,
+                Description = c.Description,
+                CreatedAt = c.CreatedAt
+            }).ToList();
+        }
+
+        public CategoryReadDto? GetCategoryById(Guid categoryId)
+        {
+            var findCategory = _categories.FirstOrDefault(c => c.CategoryId == categoryId);
+            if (findCategory == null)
+            {
+                return null;
+            }
+            return new CategoryReadDto
+            {
+                CategoryId = findCategory.CategoryId,
+                Name = findCategory.Name,
+                Description = findCategory.Description,
+                CreatedAt = findCategory.CreatedAt
+            };
+        }
+
+        public CategoryReadDto CreateCategory(CategoryCreateDto categoryData)
+        {
+            var newCategory = new Category
+            {
+                CategoryId = Guid.NewGuid(),
+                Name = categoryData.Name,
+                Description = categoryData.Description,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            _categories.Add(newCategory);
+
+            return new CategoryReadDto
+            {
+                CategoryId = newCategory.CategoryId,
+                Name = newCategory.Name,
+                Description = newCategory.Description,
+                CreatedAt = newCategory.CreatedAt,
+            };
+        }
+        public CategoryReadDto? UpdateCategoryById(Guid categoryId, CategoryUpdateDto categoryData)
+        {
+            var foundCategory = _categories.FirstOrDefault(category => category.CategoryId == categoryId);
+            if (foundCategory == null)
+            {
+                return null;
+            }
+
+            foundCategory.Name = categoryData.Name;
+            foundCategory.Description = categoryData.Description;
+
+            return new CategoryReadDto
+            {
+                CategoryId = foundCategory.CategoryId,
+                Name = foundCategory.Name,
+                Description = foundCategory.Description,
+                CreatedAt = foundCategory.CreatedAt,
+            };
+        }
+        public bool DeleteCategoryById(Guid categoryId)
+        {
+            var foundCategory = _categories.FirstOrDefault(category => category.CategoryId == categoryId);
+            if (foundCategory == null)
+            {
+                return false;
+            }
+            _categories.Remove(foundCategory);
+            return true;
+        }
+    }
+}

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using asp_net_ecommerce_web_api.DTOs;
 using ecommerce_web_api.Models;
+using ecommerce_web_api.Services;
 
 namespace asp_net_ecommerce_web_api.Controllers
 {
@@ -13,21 +14,20 @@ namespace asp_net_ecommerce_web_api.Controllers
     [Route("api/categories/")]
     public class CategoryController : ControllerBase
     {
+        private CategoryService _categoryService; 
+        public CategoryController(CategoryService categoryService)
+        {
+            _categoryService = categoryService;
+        }
 
 
-        private static List<Category> categories = new List<Category>();
+        // private static List<Category> categories = new List<Category>();
 
         // GET: /api/categories => Read categories
         [HttpGet]
         public IActionResult GetCategories()
         {
-            var categoryList = categories.Select(c => new CategoryReadDto
-            {
-                CategoryId = c.CategoryId,
-                Name = c.Name,
-                Description = c.Description,
-                CreatedAt = c.CreatedAt
-            }).ToList();
+            var categoryList = _categoryService.GetAllCategories();
 
             return Ok(ApiResponse<List<CategoryReadDto>>.SuccessResponse(categoryList, 200, "Catgeories returned successfully"));
         }
@@ -36,22 +36,15 @@ namespace asp_net_ecommerce_web_api.Controllers
         [HttpGet("{categoryId:guid}")]
         public IActionResult GetCategoryById(Guid categoryId)
         {
-            var findCategory = categories.FirstOrDefault(c => c.CategoryId == categoryId);
-            if (findCategory == null)
+            var category = _categoryService.GetCategoryById(categoryId);
+            if (category == null)
             {
                 return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { "Category with this ID does not exist" }, 404, "Validation failed"));
             }
-            var categoryReadDto = new CategoryReadDto
-            {
-                CategoryId = findCategory.CategoryId,
-                Name = findCategory.Name,
-                Description = findCategory.Description,
-                CreatedAt = findCategory.CreatedAt
-            };
 
             return Ok(
                 ApiResponse<CategoryReadDto>.SuccessResponse(
-                    categoryReadDto,
+                    category,
                     200,
                     "Category is returned successfully"
                 )
@@ -62,53 +55,33 @@ namespace asp_net_ecommerce_web_api.Controllers
         [HttpPost]
         public IActionResult CreateCategory([FromBody] CategoryCreateDto categoryData)
         {
-            var newCategory = new Category
-            {
-                CategoryId = Guid.NewGuid(),
-                Name = categoryData.Name,
-                Description = categoryData.Description,
-                CreatedAt = DateTime.UtcNow,
-            };
+            var categoryReadDto = _categoryService.CreateCategory(categoryData);
 
-            categories.Add(newCategory);
-
-            var categoryReadDto = new CategoryReadDto
-            {
-                CategoryId = newCategory.CategoryId,
-                Name = newCategory.Name,
-                Description = newCategory.Description,
-                CreatedAt = newCategory.CreatedAt,
-            };
-
-            return Created($"/api/categories/{newCategory.CategoryId}", ApiResponse<CategoryReadDto>.SuccessResponse(categoryReadDto, 201, "Catgeory created successfully"));
+            return Created(nameof(GetCategoryById), ApiResponse<CategoryReadDto>.SuccessResponse(categoryReadDto, 201, "Catgeory created successfully"));
         }
 
-        // PUT: /api/categories/{categoryId} => Update a category
+        // // PUT: /api/categories/{categoryId} => Update a category
         [HttpPut("{categoryId:guid}")]
         public IActionResult UpdateCategoryById(Guid categoryId, [FromBody] CategoryUpdateDto categoryData)
         {
-            var foundCategory = categories.FirstOrDefault(category => category.CategoryId == categoryId);
-            if (foundCategory == null)
+            var updateCategory = _categoryService.UpdateCategoryById(categoryId, categoryData);
+            if (updateCategory == null)
             {
                 return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { "Category with this ID does not exist" }, 404, "Validation failed"));
             }
 
-            foundCategory.Name = categoryData.Name;
-            foundCategory.Description = categoryData.Description;
-
-            return Ok(ApiResponse<object>.SuccessResponse(null, 204, "Catgeory Updated successfully"));
+            return Ok(ApiResponse<CategoryReadDto>.SuccessResponse(updateCategory, 200, "Catgeory Updated successfully"));
         }
 
-        // DELETE: /api/categories/{categoryId} => Delete a category by Id
+        // // DELETE: /api/categories/{categoryId} => Delete a category by Id
         [HttpDelete("{categoryId:guid}")]
         public IActionResult DeleteCategoryById(Guid categoryId)
         {
-            var foundCategory = categories.FirstOrDefault(category => category.CategoryId == categoryId);
-            if (foundCategory == null)
+            var foundCategory = _categoryService.DeleteCategoryById(categoryId);
+            if (!foundCategory)
             {
                 return NotFound(ApiResponse<object>.ErrorResponse(new List<string> { "Category with this ID does not exist" }, 404, "Validation failed"));
             }
-            categories.Remove(foundCategory);
             return Ok(ApiResponse<object>.SuccessResponse(null, 204, "Category deleted successfully"));
         }
     }

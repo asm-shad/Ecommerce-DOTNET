@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using asp_net_ecommerce_web_api.Controllers;
+using ecommerce_web_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<CategoryService>();
 
 var app = builder.Build();
 
