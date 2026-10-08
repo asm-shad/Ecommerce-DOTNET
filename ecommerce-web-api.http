@@ -6,18 +6,29 @@ Accept: application/json
 ###
 ### Create
 POST http://localhost:5145/api/categories
+Content-Type: application/json
+
+{
+    "name": "Electronics and Smart Phone",
+    "description": "The starting of modern era heavily relied on such technologies."
+}
 
 ###
 
 ### Read
-GET http://localhost:5145/api/categories
+GET http://localhost:5145/api/categories?searchValue="Apple"
 
 ###
 
 ### Update
-PUT http://localhost:5145/api/categories
+PUT http://localhost:5145/api/categories/1
+Content-Type: application/json
+
+{
+    "name": "Mobile Phones"
+}
 
 ###
 
 ### Delete
-DELETE http://localhost:5145/api/categories
+DELETE http://localhost:5145/api/categories/bfe7eca8-fd32-46b5-91a8-50f6cd56abfd
